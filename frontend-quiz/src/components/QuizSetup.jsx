@@ -43,7 +43,7 @@ function QuizSetup() {
         <FormLabel>Number of Questions</FormLabel>
         <Input type="number" value={numQuestions} onChange={(e) => setNumQuestions(e.target.value)} />
       </FormControl>
-      <Button mt="6" colorScheme="teal" onClick={handleStartQuiz}>Start Quiz</Button>
+      <Button mt="9" colorScheme="green" onClick={handleStartQuiz}>Start Quiz</Button>
     </Box>
   );
 }

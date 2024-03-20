@@ -6,12 +6,16 @@ function Quiz() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(1); 
+  const [timeLeft, setTimeLeft] = useState(1);
+  const [loading, setLoading] = useState(true); // New state to track loading status
   const navigate = useNavigate();
   const { name, category, difficulty, numQuestions } = useParams();
 
   useEffect(() => {
-    fetchQuizData();
+    const timer = setTimeout(() => {
+      fetchQuizData();
+    }, 1000); // Delay fetching data for 1 second
+    return () => clearTimeout(timer);
   }, [name, category, difficulty, numQuestions]);
 
   useEffect(() => {
@@ -30,6 +34,7 @@ function Quiz() {
       console.log('Quiz data:', data);
       setQuestions(data.results);
       setTimeLeft(getTimeForCurrentQuestion());
+      setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
       console.error('quiz data:', error);
     }
@@ -62,7 +67,10 @@ function Quiz() {
 
   return (
     <Box maxW="sm" m="auto" mt="10">
-      {questions.length > 0 ? (
+    {/* <Text>  {timeLeft}</Text> */}
+      {loading ? ( // Render loading message while data is being fetched
+        <Text>Loading...</Text>
+      ) : questions.length > 0 ? (
         <>
           <Text mb="4">Question {currentQuestionIndex + 1} of {numQuestions}</Text>
           <Text mb="4">{currentQuestion?.question}</Text>
@@ -71,10 +79,10 @@ function Quiz() {
               {option}
             </Button>
           ))}
-          <Button mt="6" colorScheme="teal" onClick={handleSubmitQuiz}>Submit</Button>
+          <Button mt="9" colorScheme="green" onClick={handleSubmitQuiz}>Submit</Button>
         </>
       ) : (
-        <Text>Loading...</Text>
+        <Text>No questions found.</Text>
       )}
     </Box>
   );
