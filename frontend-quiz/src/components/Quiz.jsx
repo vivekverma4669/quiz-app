@@ -1,48 +1,82 @@
-// components/Quiz.js
 import React, { useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Button, Text } from '@chakra-ui/react';
 
 function Quiz() {
-  const location = useLocation();
-  const history = useHistory();
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const { name, category, difficulty, numQuestions } = new URLSearchParams(location.search);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(1); 
+  const navigate = useNavigate();
+  const { name, category, difficulty, numQuestions } = useParams();
 
   useEffect(() => {
-    // Fetch questions based on query parameters
-    fetch(`https://opentdb.com/api.php?amount=${numQuestions}&category=${category}&difficulty=${difficulty}&type=multiple`)
-      .then(response => response.json())
-      .then(data => setQuestions(data.results))
-      .catch(error => console.error('Error fetching questions:', error));
-  }, [category, difficulty, numQuestions]);
+    fetchQuizData();
+  }, [name, category, difficulty, numQuestions]);
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-    } else {
-      // Redirect to leaderboard or quiz summary page
-      history.push('/leaderboard');
+  useEffect(() => {
+    if (currentQuestionIndex < questions.length) {
+      const timer = setTimeout(() => {
+        goToNextQuestion();
+      }, getTimeForCurrentQuestion());
+      return () => clearTimeout(timer);
+    }
+  }, [currentQuestionIndex, questions]);
+
+  const fetchQuizData = async () => {
+    try {
+      const response = await fetch(`https://opentdb.com/api.php?amount=${numQuestions}&category=${category}&difficulty=${difficulty}&type=multiple`);
+      const data = await response.json();
+      console.log('Quiz data:', data);
+      setQuestions(data.results);
+      setTimeLeft(getTimeForCurrentQuestion());
+    } catch (error) {
+      console.error('quiz data:', error);
     }
   };
 
+  const getTimeForCurrentQuestion = () => {
+    const difficultyFactor = {
+      easy: 30,
+      medium: 20,
+      hard: 10
+    };
+    return difficultyFactor[difficulty] * 1000;
+  };
+
+  const goToNextQuestion = () => {
+    setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    setTimeLeft(getTimeForCurrentQuestion());
+  };
+
+  const handleAnswer = (selectedOption) => {
+    setUserAnswers(prevAnswers => [...prevAnswers, selectedOption]);
+    goToNextQuestion();
+  };
+
+  const handleSubmitQuiz = () => {
+    navigate('/leaderboard');
+  };
+
+  const currentQuestion = questions[currentQuestionIndex];
+
   return (
-    <div>
-      <h1>Quiz</h1>
-      {questions.length > 0 && (
-        <div>
-          <p>Question {currentQuestionIndex + 1} of {numQuestions}</p>
-          <h2>{questions[currentQuestionIndex].question}</h2>
-          <ul>
-            {questions[currentQuestionIndex].incorrect_answers.map((option, index) => (
-              <li key={index}>{option}</li>
-            ))}
-            <li>{questions[currentQuestionIndex].correct_answer}</li>
-          </ul>
-          <button onClick={handleNextQuestion}>Next</button>
-        </div>
+    <Box maxW="sm" m="auto" mt="10">
+      {questions.length > 0 ? (
+        <>
+          <Text mb="4">Question {currentQuestionIndex + 1} of {numQuestions}</Text>
+          <Text mb="4">{currentQuestion?.question}</Text>
+          {currentQuestion?.incorrect_answers.map((option, index) => (
+            <Button key={index} variant="outline" mr="2" mb="2" onClick={() => handleAnswer(option)}>
+              {option}
+            </Button>
+          ))}
+          <Button mt="6" colorScheme="teal" onClick={handleSubmitQuiz}>Submit</Button>
+        </>
+      ) : (
+        <Text>Loading...</Text>
       )}
-    </div>
+    </Box>
   );
 }
 

@@ -1,12 +1,11 @@
-// components/Leaderboard.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 function Leaderboard() {
   const [leaderboardData, setLeaderboardData] = useState([]);
 
   useEffect(() => {
     // Fetch leaderboard data from JSON server
-    fetch('https://your-json-server-url/leaderboard')
+    fetch('http://localhost:3001/leaderboard')
       .then(response => response.json())
       .then(data => setLeaderboardData(data))
       .catch(error => console.error('Error fetching leaderboard data:', error));
@@ -14,23 +13,12 @@ function Leaderboard() {
 
   return (
     <div>
-      <h1>Leaderboard</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leaderboardData.map((entry, index) => (
-            <tr key={index}>
-              <td>{entry.name}</td>
-              <td>{entry.score}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2 mb="4">Leaderboard</h2>
+      {leaderboardData.map((entry, index) => (
+        <div key={index} mb="2">
+          <p>{entry.name} - Score: {entry.score}</p>
+        </div>
+      ))}
     </div>
   );
 }

@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+body{
+  background-color: #282c34;
+}
+form{
+  padding: 40px;
+  width: 600px;
+  margin: auto;
+  border: 5px solid crimson;
+  gap: 20px;
+  background-color: #282c34;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+form input{
+  padding: 10px;
+}
